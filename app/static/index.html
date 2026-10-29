@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GoAccess filter - Nginx Proxy Manager</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header id="bar">
+    <form id="filters" autocomplete="off">
+      <div class="row">
+        <div class="group presets" role="group" aria-label="Time window">
+          <button type="button" data-preset="1h">1h</button>
+          <button type="button" data-preset="6h">6h</button>
+          <button type="button" data-preset="24h">24h</button>
+          <button type="button" data-preset="7d">7d</button>
+          <button type="button" data-preset="30d">30d</button>
+          <button type="button" data-preset="all" class="active">All</button>
+        </div>
+        <label>From <input type="datetime-local" name="from" step="1"></label>
+        <label>To <input type="datetime-local" name="to" step="1"></label>
+
+        <details class="dropdown" id="host-dd">
+          <summary>Hosts <span class="count"></span></summary>
+          <div class="menu" id="host-menu"><em>loading…</em></div>
+        </details>
+
+        <details class="dropdown" id="source-dd">
+          <summary>Proxy hosts <span class="count"></span></summary>
+          <div class="menu" id="source-menu"><em>loading…</em></div>
+        </details>
+
+        <label>Status <input type="text" name="status" placeholder="4xx,5xx,404" list="status-list" size="12"></label>
+        <datalist id="status-list">
+          <option value="2xx"><option value="3xx"><option value="4xx"><option value="5xx">
+          <option value="200"><option value="301"><option value="302"><option value="304">
+          <option value="400"><option value="401"><option value="403"><option value="404"><option value="429">
+          <option value="499"><option value="500"><option value="502"><option value="503"><option value="504">
+        </datalist>
+
+        <details class="dropdown" id="method-dd">
+          <summary>Method <span class="count"></span></summary>
+          <div class="menu" id="method-menu">
+            <label><input type="checkbox" name="method" value="GET"> GET</label>
+            <label><input type="checkbox" name="method" value="POST"> POST</label>
+            <label><input type="checkbox" name="method" value="PUT"> PUT</label>
+            <label><input type="checkbox" name="method" value="PATCH"> PATCH</label>
+            <label><input type="checkbox" name="method" value="DELETE"> DELETE</label>
+            <label><input type="checkbox" name="method" value="HEAD"> HEAD</label>
+            <label><input type="checkbox" name="method" value="OPTIONS"> OPTIONS</label>
+            <label><input type="checkbox" name="method" value="PROPFIND"> PROPFIND</label>
+          </div>
+        </details>
+      </div>
+
+      <div class="row">
+        <label>IP <input type="text" name="ip" placeholder="1.2.3.4, 10.0.0.0/8" size="20"></label>
+        <label>Not IP <input type="text" name="ip_exclude" placeholder="192.168.0.0/16" size="18"></label>
+        <label>Path <input type="text" name="path" placeholder="/api/" size="16"></label>
+        <label>User agent <input type="text" name="ua" placeholder="curl" size="14"></label>
+        <label>Search <input type="search" name="q" placeholder="any text in line" size="16"></label>
+        <label class="check"><input type="checkbox" name="ignore_crawlers"> Ignore crawlers</label>
+        <button type="button" id="toggle-advanced" class="link">more…</button>
+
+        <span class="spacer"></span>
+
+        <button type="submit" class="primary" id="btn-apply">Apply</button>
+        <button type="button" id="btn-refresh" title="Regenerate report, bypassing cache">Refresh</button>
+        <button type="button" id="btn-reset">Reset</button>
+        <a id="btn-export" class="button" href="/api/export" download title="Download the matching raw log lines">Export</a>
+      </div>
+
+      <div class="row advanced" hidden>
+        <label>Not status <input type="text" name="status_exclude" placeholder="2xx,3xx" size="12"></label>
+        <label>Host contains <input type="text" name="host_contains" placeholder="plex" size="12"></label>
+        <label>Not path <input type="text" name="path_exclude" placeholder="/health" size="14"></label>
+        <label>Path regex <input type="text" name="path_regex" placeholder="^/(api|v1)/" size="16"></label>
+        <label>Not user agent <input type="text" name="ua_exclude" placeholder="Uptime-Kuma" size="14"></label>
+      </div>
+    </form>
+
+    <div id="status">
+      <span id="summary">Loading…</span>
+      <span id="range"></span>
+      <span id="error" hidden></span>
+    </div>
+  </header>
+
+  <main>
+    <div id="loading" class="overlay" hidden>
+      <div class="spinner"></div>
+      <div id="loading-text">Filtering logs and rendering report…</div>
+    </div>
+    <iframe id="report" title="GoAccess report" src="about:blank"></iframe>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

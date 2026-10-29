@@ -1,0 +1,26 @@
+# Add this service to the compose file that already runs nginx-proxy-manager,
+# crowdsec and goaccess. Paths assume this repository is checked out as
+# ./goaccess-dashboard next to that compose file.
+services:
+  goaccess-filter:
+    build: ./goaccess-dashboard
+    container_name: goaccess-filter
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Brussels
+      - SKIP_ARCHIVED_LOGS=False   # same meaning as in the goaccess container
+      - CACHE_TTL=60               # seconds a report is reused for identical filters
+    ports:
+      - '192.168.0.3:7881:8000'    # LAN only, like goaccess
+    volumes:
+      - ./data/logs:/opt/log:ro
+      - goaccess-filter-cache:/cache
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  goaccess-filter-cache:
